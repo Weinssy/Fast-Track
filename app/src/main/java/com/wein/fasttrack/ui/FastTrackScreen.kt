@@ -5,61 +5,110 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wein.fasttrack.data.Expense
+import com.wein.fasttrack.utils.CsvExporter
 import com.wein.fasttrack.viewmodel.ExpenseViewModel
 import com.wein.fasttrack.viewmodel.FastTrackUiState
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FastTrackScreen(
     viewModel: ExpenseViewModel,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
-    ) {
-        HeroDisplay(
-            uiState = uiState,
-            modifier = Modifier.weight(1f)
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        HistoryList(
-            expenses = uiState.todayExpenses,
-            onDelete = { viewModel.deleteExpense(it) },
-            modifier = Modifier.weight(1f)
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        CustomKeypad(
-            onDigit = { viewModel.onDigitPressed(it) },
-            onBackspace = { viewModel.onBackspacePressed() },
-            onSave = { viewModel.onSavePressed() },
-            modifier = Modifier.fillMaxWidth()
-        )
+    LaunchedEffect(uiState.exportData) {
+        uiState.exportData?.let { expenses ->
+            CsvExporter.cleanupOldExports(context)
+            val uri = CsvExporter.exportExpensesToCsv(context, expenses)
+            if (uri != null) {
+                CsvExporter.shareCsv(context, uri)
+            }
+            viewModel.onExportHandled()
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Fast Track") },
+                actions = {
+                    IconButton(onClick = { viewModel.onExportTriggered() }, enabled = !uiState.isExporting) {
+                        if (uiState.isExporting) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        } else {
+                            Icon(Icons.Default.Share, contentDescription = "Export to CSV")
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
+                )
+            )
+        },
+        modifier = modifier.fillMaxSize()
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
+        ) {
+            HeroDisplay(
+                uiState = uiState,
+                modifier = Modifier.weight(1f)
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            HistoryList(
+                expenses = uiState.todayExpenses,
+                onDelete = { viewModel.deleteExpense(it) },
+                modifier = Modifier.weight(1f)
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TagSelector(
+                selectedTag = uiState.selectedTag,
+                onTagSelected = { viewModel.onTagSelected(it) },
+                modifier = Modifier.fillMaxWidth()
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            CustomKeypad(
+                onDigit = { viewModel.onDigitPressed(it) },
+                onBackspace = { viewModel.onBackspacePressed() },
+                onSave = { viewModel.onSavePressed() },
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            )
+        }
     }
 }
 
@@ -112,20 +161,20 @@ fun HistoryList(
 
     LazyColumn(modifier = modifier.fillMaxWidth()) {
         items(expenses, key = { it.id }) { expense ->
-            val dismissState = rememberDismissState(
+            val dismissState = rememberSwipeToDismissBoxState(
                 confirmValueChange = {
-                    if (it == DismissValue.DismissedToStart) {
+                    if (it == SwipeToDismissBoxValue.EndToStart) {
                         onDelete(expense)
                         true
                     } else false
                 }
             )
 
-            SwipeToDismiss(
+            SwipeToDismissBox(
                 state = dismissState,
-                background = {
+                backgroundContent = {
                     val color by animateColorAsState(
-                        if (dismissState.targetValue == DismissValue.DismissedToStart) Color.Red else Color.Transparent,
+                        if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) Color.Red else Color.Transparent,
                         label = "dismissColor"
                     )
                     Box(
@@ -136,12 +185,13 @@ fun HistoryList(
                             .padding(end = 16.dp),
                         contentAlignment = Alignment.CenterEnd
                     ) {
-                        if (dismissState.targetValue == DismissValue.DismissedToStart) {
+                        if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
                         }
                     }
                 },
-                dismissContent = {
+                enableDismissFromStartToEnd = false,
+                content = {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -163,8 +213,7 @@ fun HistoryList(
                             fontSize = 16.sp
                         )
                     }
-                },
-                directions = setOf(DismissDirection.EndToStart)
+                }
             )
         }
     }
@@ -231,6 +280,56 @@ fun KeypadButton(
             text = text,
             color = if (isAction) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
             fontSize = if (isAction) 20.sp else 24.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+fun TagSelector(
+    selectedTag: String,
+    onTagSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val tags = listOf("General", "Food", "Transport", "Bills", "Groceries", "Snack")
+    
+    LazyRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 4.dp)
+    ) {
+        items(tags) { tag ->
+            TagChip(
+                text = tag,
+                isSelected = tag == selectedTag,
+                onClick = { onTagSelected(tag) }
+            )
+        }
+    }
+}
+
+@Composable
+fun TagChip(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val backgroundColor = if (isSelected) Color(0xFF2CB67D) else Color(0xFF242629)
+    val textColor = if (isSelected) Color.White else Color(0xFF94A1B2)
+    
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(backgroundColor)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = textColor,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )
     }

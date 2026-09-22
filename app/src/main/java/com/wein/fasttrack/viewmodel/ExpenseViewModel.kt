@@ -16,22 +16,34 @@ import kotlinx.coroutines.launch
 data class FastTrackUiState(
     val currentInput: String = "",
     val todayTotal: Long = 0L,
-    val todayExpenses: List<Expense> = emptyList()
+    val todayExpenses: List<Expense> = emptyList(),
+    val isExporting: Boolean = false,
+    val exportData: List<Expense>? = null,
+    val selectedTag: String = "General"
 )
 
 class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() {
 
     private val _currentInput = MutableStateFlow("")
+    private val _isExporting = MutableStateFlow(false)
+    private val _exportData = MutableStateFlow<List<Expense>?>(null)
+    private val _selectedTag = MutableStateFlow("General")
 
     val uiState: StateFlow<FastTrackUiState> = combine(
         _currentInput,
         repository.getTodayTotal(),
-        repository.getTodayExpenses()
-    ) { input, total, expenses ->
+        repository.getTodayExpenses(),
+        _isExporting,
+        _exportData,
+        _selectedTag
+    ) { inputs ->
         FastTrackUiState(
-            currentInput = input,
-            todayTotal = total ?: 0L,
-            todayExpenses = expenses
+            currentInput = inputs[0] as String,
+            todayTotal = inputs[1] as? Long ?: 0L,
+            todayExpenses = inputs[2] as List<Expense>,
+            isExporting = inputs[3] as Boolean,
+            exportData = inputs[4] as List<Expense>?,
+            selectedTag = inputs[5] as String
         )
     }.stateIn(
         scope = viewModelScope,
@@ -63,16 +75,34 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
         val amount = _currentInput.value.toLongOrNull()
         if (amount != null && amount > 0) {
             viewModelScope.launch {
-                repository.insertExpense(Expense(amount = amount))
+                repository.insertExpense(Expense(amount = amount, tag = _selectedTag.value))
                 _currentInput.value = ""
+                _selectedTag.value = "General"
             }
         }
+    }
+
+    fun onTagSelected(tag: String) {
+        _selectedTag.value = if (_selectedTag.value == tag) "General" else tag
     }
 
     fun deleteExpense(expense: Expense) {
         viewModelScope.launch {
             repository.deleteExpense(expense)
         }
+    }
+
+    fun onExportTriggered() {
+        viewModelScope.launch {
+            _isExporting.value = true
+            val allExpenses = repository.getAllExpenses()
+            _exportData.value = allExpenses
+            _isExporting.value = false
+        }
+    }
+
+    fun onExportHandled() {
+        _exportData.value = null
     }
 }
 

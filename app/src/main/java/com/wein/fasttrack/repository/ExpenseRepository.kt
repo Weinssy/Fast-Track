@@ -29,6 +29,10 @@ class ExpenseRepository(private val expenseDao: ExpenseDao) {
         return expenseDao.getTodayExpenses(getStartOfDay(), getEndOfDay())
     }
 
+    suspend fun getAllExpenses(): List<Expense> {
+        return expenseDao.getAllExpenses()
+    }
+
     fun getTodayTotal(): Flow<Long?> {
         return expenseDao.getTodayTotal(getStartOfDay(), getEndOfDay())
     }

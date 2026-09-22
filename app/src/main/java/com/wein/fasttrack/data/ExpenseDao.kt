@@ -12,6 +12,9 @@ interface ExpenseDao {
     @Query("SELECT * FROM expenses WHERE timestamp >= :startOfDay AND timestamp <= :endOfDay ORDER BY timestamp DESC")
     fun getTodayExpenses(startOfDay: Long, endOfDay: Long): Flow<List<Expense>>
 
+    @Query("SELECT * FROM expenses ORDER BY timestamp DESC")
+    suspend fun getAllExpenses(): List<Expense>
+
     @Query("SELECT SUM(amount) FROM expenses WHERE timestamp >= :startOfDay AND timestamp <= :endOfDay")
     fun getTodayTotal(startOfDay: Long, endOfDay: Long): Flow<Long?>
 

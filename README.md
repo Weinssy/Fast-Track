@@ -2,7 +2,7 @@
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Version](https://img.shields.io/badge/version-1.0.0-orange)
+![Version](https://img.shields.io/badge/version-1.2.0-orange)
 
 **Fast Track** is an ultra-fast, zero-friction daily expense tracker designed for Android. 
 
@@ -41,9 +41,9 @@ To build the project locally, clone the repository and open it in Android Studio
 ```
 
 ## Roadmap
-- [ ] Add basic tagging/categorization after initial save.
+- [x] Add inline tagging/categorization for expenses.
 - [ ] Implement daily/weekly analytical charts.
-- [ ] Add CSV export functionality for backing up data.
+- [x] Add CSV export functionality for backing up data.
 - [ ] Light mode support (currently strictly Dark Minimalist).
 
 ## Contributing
