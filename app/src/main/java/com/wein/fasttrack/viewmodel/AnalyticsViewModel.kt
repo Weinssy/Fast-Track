@@ -59,7 +59,7 @@ class AnalyticsViewModel(private val repository: ExpenseRepository) : ViewModel(
             
             val tempCalendar = Calendar.getInstance()
             tempCalendar.timeInMillis = startTime
-            val dayFormat = java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault())
+            val dayFormat = java.text.SimpleDateFormat("EEE", java.util.Locale("id", "ID"))
 
             for (i in 0..6) {
                 val dayOfYear = tempCalendar.get(Calendar.DAY_OF_YEAR)

@@ -19,10 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.wein.fasttrack.R
 import com.wein.fasttrack.data.Expense
 import com.wein.fasttrack.utils.CsvExporter
 import com.wein.fasttrack.viewmodel.ExpenseViewModel
@@ -64,7 +66,7 @@ fun FastTrackScreen(
                         if (uiState.isExporting) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                         } else {
-                            Icon(Icons.Default.Share, contentDescription = "Export to CSV")
+                            Icon(Icons.Default.Share, contentDescription = stringResource(R.string.export_csv))
                         }
                     }
                 },
@@ -122,7 +124,7 @@ fun HeroDisplay(
     uiState: FastTrackUiState,
     modifier: Modifier = Modifier
 ) {
-    val currencyFormat = NumberFormat.getCurrencyInstance(Locale.getDefault()).apply {
+    val currencyFormat = NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply {
         maximumFractionDigits = 0
     }
     
@@ -138,7 +140,7 @@ fun HeroDisplay(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Today's Total: ${currencyFormat.format(uiState.todayTotal)}",
+            text = "${stringResource(R.string.today_total)}: ${currencyFormat.format(uiState.todayTotal)}",
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 16.sp
         )
@@ -161,8 +163,8 @@ fun HistoryList(
     onDelete: (Expense) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
-    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()).apply { maximumFractionDigits = 0 } }
+    val timeFormat = remember { SimpleDateFormat("HH:mm", Locale("id", "ID")) }
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply { maximumFractionDigits = 0 } }
 
     LazyColumn(modifier = modifier.fillMaxWidth()) {
         items(expenses, key = { it.id }) { expense ->
@@ -208,7 +210,7 @@ fun HistoryList(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column {
-                            Text(text = expense.tag ?: "General", color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp)
+                            Text(text = expense.tag ?: stringResource(R.string.tag_umum), color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp)
                             Text(text = timeFormat.format(Date(expense.timestamp)), color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp)
                         }
                         Text(
@@ -231,11 +233,12 @@ fun CustomKeypad(
     onSave: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val saveText = stringResource(R.string.save)
     val rows = listOf(
         listOf("1", "2", "3"),
         listOf("4", "5", "6"),
         listOf("7", "8", "9"),
-        listOf("⌫", "0", "Save")
+        listOf("⌫", "0", saveText)
     )
 
     Column(
@@ -254,11 +257,11 @@ fun CustomKeypad(
                         onClick = {
                             when (key) {
                                 "⌫" -> onBackspace()
-                                "Save" -> onSave()
+                                saveText -> onSave()
                                 else -> onDigit(key.toInt())
                             }
                         },
-                        isAction = key == "Save"
+                        isAction = key == saveText
                     )
                 }
             }
@@ -296,7 +299,7 @@ fun TagSelector(
     onTagSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tags = listOf("General", "Food", "Transport", "Bills", "Groceries", "Snack")
+    val tags = listOf("Umum", "Makan", "Transport", "Belanja", "Tagihan", "Jajan")
     
     LazyRow(
         modifier = modifier,

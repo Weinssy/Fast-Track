@@ -19,7 +19,7 @@ data class FastTrackUiState(
     val todayExpenses: List<Expense> = emptyList(),
     val isExporting: Boolean = false,
     val exportData: List<Expense>? = null,
-    val selectedTag: String = "General"
+    val selectedTag: String = "Umum"
 )
 
 class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() {
@@ -27,7 +27,7 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     private val _currentInput = MutableStateFlow("")
     private val _isExporting = MutableStateFlow(false)
     private val _exportData = MutableStateFlow<List<Expense>?>(null)
-    private val _selectedTag = MutableStateFlow("General")
+    private val _selectedTag = MutableStateFlow("Umum")
 
     val uiState: StateFlow<FastTrackUiState> = combine(
         _currentInput,
@@ -77,13 +77,13 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
             viewModelScope.launch {
                 repository.insertExpense(Expense(amount = amount, tag = _selectedTag.value))
                 _currentInput.value = ""
-                _selectedTag.value = "General"
+                _selectedTag.value = "Umum"
             }
         }
     }
 
     fun onTagSelected(tag: String) {
-        _selectedTag.value = if (_selectedTag.value == tag) "General" else tag
+        _selectedTag.value = if (_selectedTag.value == tag) "Umum" else tag
     }
 
     fun deleteExpense(expense: Expense) {

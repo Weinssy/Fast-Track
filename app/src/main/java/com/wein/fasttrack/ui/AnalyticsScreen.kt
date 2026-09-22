@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.wein.fasttrack.R
 import com.wein.fasttrack.viewmodel.AnalyticsViewModel
 import java.text.NumberFormat
 import java.util.Locale
@@ -28,7 +30,7 @@ fun AnalyticsScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()).apply { maximumFractionDigits = 0 } }
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply { maximumFractionDigits = 0 } }
 
     LaunchedEffect(Unit) {
         viewModel.loadAnalytics()
@@ -37,7 +39,7 @@ fun AnalyticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Analytics (Last 7 Days)") },
+                title = { Text(stringResource(R.string.analytics)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -75,7 +77,7 @@ fun AnalyticsScreen(
 
                 item {
                     Text(
-                        text = "Daily Trend",
+                        text = stringResource(R.string.daily_trend),
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -89,7 +91,7 @@ fun AnalyticsScreen(
 
                 item {
                     Text(
-                        text = "Category Breakdown",
+                        text = stringResource(R.string.category_breakdown),
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -103,7 +105,7 @@ fun AnalyticsScreen(
                     } else 0f
                     
                     TagDistributionItem(
-                        tag = tagTotal.tag ?: "General",
+                        tag = tagTotal.tag ?: stringResource(R.string.tag_umum),
                         amount = currencyFormat.format(tagTotal.totalAmount),
                         percentage = percentage
                     )
@@ -133,12 +135,12 @@ fun MetricsCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
-            Text(text = "Total Spent", color = Color(0xFF94A1B2), fontSize = 14.sp)
+            Text(text = stringResource(R.string.total_this_week), color = Color(0xFF94A1B2), fontSize = 14.sp)
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = weeklyTotal, color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         }
         Column(horizontalAlignment = Alignment.End) {
-            Text(text = "Daily Avg", color = Color(0xFF94A1B2), fontSize = 14.sp)
+            Text(text = stringResource(R.string.daily_average), color = Color(0xFF94A1B2), fontSize = 14.sp)
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = dailyAverage, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Medium)
         }

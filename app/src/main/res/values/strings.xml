@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fast Track</string>
+    <string name="today_total">Hari Ini</string>
+    <string name="empty_state">Belum ada catatan hari ini</string>
+    <string name="save">Simpan</string>
+    <string name="export_csv">Ekspor CSV</string>
+    <string name="analytics">Analitik</string>
+    <string name="total_this_week">Total Minggu Ini</string>
+    <string name="daily_average">Rata-rata Harian</string>
+    <string name="daily_trend">Tren Harian</string>
+    <string name="category_breakdown">Pembagian Kategori</string>
+    <string name="tag_umum">Umum</string>
+</resources>

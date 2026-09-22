@@ -39,7 +39,7 @@ fun CustomBarChart(
     }
 
     val currencyFormat = remember {
-        NumberFormat.getCurrencyInstance(Locale.getDefault()).apply {
+        NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply {
             maximumFractionDigits = 0
         }
     }

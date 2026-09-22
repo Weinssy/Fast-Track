@@ -22,16 +22,17 @@ object CsvExporter {
             exportsDir.mkdirs()
         }
 
-        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val idLocale = Locale("id", "ID")
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", idLocale).format(Date())
         val file = File(exportsDir, "fast_track_expenses_$timestamp.csv")
 
         try {
             FileWriter(file).use { writer ->
                 // Header
-                writer.append("ID,Date,Time,Amount,Tag,Note\n")
+                writer.append("ID,Tanggal,Waktu,Nominal,Kategori,Catatan\n")
 
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", idLocale)
+                val timeFormat = SimpleDateFormat("HH:mm:ss", idLocale)
 
                 expenses.forEach { expense ->
                     val dateObj = Date(expense.timestamp)
