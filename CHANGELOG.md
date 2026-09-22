@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.3.1] - 2026-09-22
+### Changed
+- **Bahasa Indonesia Localization**: Seluruh UI, format tanggal, dan mata uang (`Rp`) kini sepenuhnya menggunakan standar dan bahasa Indonesia secara konsisten.
+- **Kategori Bawaan**: Pilihan kategori yang tersedia kini disesuaikan dengan kebiasaan pengguna lokal (Umum, Makan, Transport, Belanja, Tagihan, Jajan).
+- **Format CSV**: Pengaturan *header* CSV dan internalisasi nama file menggunakan format Indonesia.
 ## [1.3.0] - 2026-09-22
 ### Added
 - **Lightweight Visual Analytics**: A completely new Analytics Screen accessed via the top app bar.
