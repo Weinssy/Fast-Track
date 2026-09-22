@@ -2,6 +2,7 @@ package com.wein.fasttrack.repository
 
 import com.wein.fasttrack.data.Expense
 import com.wein.fasttrack.data.ExpenseDao
+import com.wein.fasttrack.data.TagTotal
 import kotlinx.coroutines.flow.Flow
 import java.util.Calendar
 
@@ -31,6 +32,14 @@ class ExpenseRepository(private val expenseDao: ExpenseDao) {
 
     suspend fun getAllExpenses(): List<Expense> {
         return expenseDao.getAllExpenses()
+    }
+
+    suspend fun getExpensesBetween(startTime: Long, endTime: Long): List<Expense> {
+        return expenseDao.getExpensesBetween(startTime, endTime)
+    }
+
+    suspend fun getTagTotalsBetween(startTime: Long, endTime: Long): List<TagTotal> {
+        return expenseDao.getTagTotalsBetween(startTime, endTime)
     }
 
     fun getTodayTotal(): Flow<Long?> {

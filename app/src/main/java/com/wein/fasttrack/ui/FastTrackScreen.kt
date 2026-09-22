@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +35,7 @@ import java.util.*
 @Composable
 fun FastTrackScreen(
     viewModel: ExpenseViewModel,
+    onNavigateToAnalytics: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -55,6 +57,9 @@ fun FastTrackScreen(
             TopAppBar(
                 title = { Text("Fast Track") },
                 actions = {
+                    IconButton(onClick = onNavigateToAnalytics) {
+                        Icon(Icons.Default.List, contentDescription = "View Analytics")
+                    }
                     IconButton(onClick = { viewModel.onExportTriggered() }, enabled = !uiState.isExporting) {
                         if (uiState.isExporting) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)

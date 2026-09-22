@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.0] - 2026-09-22
+### Added
+- **Lightweight Visual Analytics**: A completely new Analytics Screen accessed via the top app bar.
+- **7-Day Bar Chart**: Custom-built using Jetpack Compose Canvas (zero third-party libraries) to display your weekly spending trends.
+- **Category Breakdown**: View your expenditure grouped by tags with visual progress bars.
+
+### Changed
+- Smooth screen transition added between the main input view and analytics view.
+
+
 ## [1.2.0] - 2026-09-22
 ### Added
 - **Fast Inline Tagging**: New horizontally scrollable Tag Selector directly above the keypad for lightning-fast categorization without dialogs or pop-ups.

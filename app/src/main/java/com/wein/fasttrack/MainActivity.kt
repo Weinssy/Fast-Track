@@ -9,7 +9,17 @@ import com.wein.fasttrack.repository.ExpenseRepository
 import com.wein.fasttrack.ui.FastTrackScreen
 import com.wein.fasttrack.ui.theme.FastTrackTheme
 import com.wein.fasttrack.viewmodel.ExpenseViewModel
+import androidx.compose.animation.Crossfade
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.wein.fasttrack.ui.AnalyticsScreen
+import com.wein.fasttrack.viewmodel.AnalyticsViewModel
+import com.wein.fasttrack.viewmodel.AnalyticsViewModelFactory
 import com.wein.fasttrack.viewmodel.ExpenseViewModelFactory
+
+enum class Screen { MAIN, ANALYTICS }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,12 +27,33 @@ class MainActivity : ComponentActivity() {
         
         val database = AppDatabase.getDatabase(applicationContext)
         val repository = ExpenseRepository(database.expenseDao())
-        val factory = ExpenseViewModelFactory(repository)
-        val viewModel = ViewModelProvider(this, factory)[ExpenseViewModel::class.java]
+        
+        val expenseFactory = ExpenseViewModelFactory(repository)
+        val expenseViewModel = ViewModelProvider(this, expenseFactory)[ExpenseViewModel::class.java]
+        
+        val analyticsFactory = AnalyticsViewModelFactory(repository)
+        val analyticsViewModel = ViewModelProvider(this, analyticsFactory)[AnalyticsViewModel::class.java]
 
         setContent {
+            var currentScreen by remember { mutableStateOf(Screen.MAIN) }
+
             FastTrackTheme {
-                FastTrackScreen(viewModel = viewModel)
+                Crossfade(targetState = currentScreen, label = "ScreenTransition") { screen ->
+                    when (screen) {
+                        Screen.MAIN -> {
+                            FastTrackScreen(
+                                viewModel = expenseViewModel,
+                                onNavigateToAnalytics = { currentScreen = Screen.ANALYTICS }
+                            )
+                        }
+                        Screen.ANALYTICS -> {
+                            AnalyticsScreen(
+                                viewModel = analyticsViewModel,
+                                onNavigateBack = { currentScreen = Screen.MAIN }
+                            )
+                        }
+                    }
+                }
             }
         }
     }

@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import com.wein.fasttrack.data.TagTotal
 
 @Dao
 interface ExpenseDao {
@@ -17,6 +18,12 @@ interface ExpenseDao {
 
     @Query("SELECT SUM(amount) FROM expenses WHERE timestamp >= :startOfDay AND timestamp <= :endOfDay")
     fun getTodayTotal(startOfDay: Long, endOfDay: Long): Flow<Long?>
+
+    @Query("SELECT * FROM expenses WHERE timestamp >= :startTime AND timestamp <= :endTime ORDER BY timestamp ASC")
+    suspend fun getExpensesBetween(startTime: Long, endTime: Long): List<Expense>
+
+    @Query("SELECT tag, SUM(amount) as totalAmount FROM expenses WHERE timestamp >= :startTime AND timestamp <= :endTime GROUP BY tag ORDER BY totalAmount DESC")
+    suspend fun getTagTotalsBetween(startTime: Long, endTime: Long): List<TagTotal>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(expense: Expense)

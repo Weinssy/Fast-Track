@@ -42,7 +42,7 @@ To build the project locally, clone the repository and open it in Android Studio
 
 ## Roadmap
 - [x] Add inline tagging/categorization for expenses.
-- [ ] Implement daily/weekly analytical charts.
+- [x] Implement daily/weekly analytical charts.
 - [x] Add CSV export functionality for backing up data.
 - [ ] Light mode support (currently strictly Dark Minimalist).
 
