@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.5.0] - 2026-09-24
+### Added
+- **Long-Press Deletion**: Added long-press gesture on custom category chips to prompt deletion.
+
+### Changed
+- **Fallback Selection**: Automatic fallback to "Umum" if the currently active tag is deleted.
+
+### Fixed
+- **Preset Protection**: Preset categories are permanently locked and guarded from accidental removal.
+
 ## [1.4.0] - 2026-09-24
 ### Added
 - **Dynamic Custom Tags**: Users can now create their own custom categories directly from the main screen by tapping the "+ Tambah" button.

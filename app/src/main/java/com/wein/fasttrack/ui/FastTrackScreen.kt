@@ -1,8 +1,10 @@
 package com.wein.fasttrack.ui
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -27,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wein.fasttrack.R
 import com.wein.fasttrack.data.Expense
+import com.wein.fasttrack.data.TagEntity
 import com.wein.fasttrack.utils.CsvExporter
 import com.wein.fasttrack.viewmodel.ExpenseViewModel
 import com.wein.fasttrack.viewmodel.FastTrackUiState
@@ -103,10 +106,11 @@ fun FastTrackScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             TagSelector(
-                tags = uiState.availableTags.map { it.name },
+                tags = uiState.availableTags,
                 selectedTag = uiState.selectedTag,
-                onTagSelected = { viewModel.onTagSelected(it) },
+                onTagSelected = { viewModel.onTagSelected(it.name) },
                 onAddTagClicked = { viewModel.setShowAddTagDialog(true) },
+                onTagLongClicked = { viewModel.setTagToDelete(it) },
                 modifier = Modifier.fillMaxWidth()
             )
             
@@ -124,6 +128,14 @@ fun FastTrackScreen(
             AddTagDialog(
                 onDismiss = { viewModel.setShowAddTagDialog(false) },
                 onConfirm = { viewModel.addNewTag(it) }
+            )
+        }
+
+        uiState.tagToDelete?.let { tag ->
+            DeleteTagDialog(
+                tag = tag,
+                onDismiss = { viewModel.setTagToDelete(null) },
+                onConfirm = { viewModel.deleteCustomTag(tag) }
             )
         }
     }
@@ -305,10 +317,11 @@ fun KeypadButton(
 
 @Composable
 fun TagSelector(
-    tags: List<String>,
+    tags: List<TagEntity>,
     selectedTag: String,
-    onTagSelected: (String) -> Unit,
+    onTagSelected: (TagEntity) -> Unit,
     onAddTagClicked: () -> Unit,
+    onTagLongClicked: (TagEntity) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyRow(
@@ -318,9 +331,10 @@ fun TagSelector(
     ) {
         items(tags) { tag ->
             TagChip(
-                text = tag,
-                isSelected = tag == selectedTag,
-                onClick = { onTagSelected(tag) }
+                tag = tag,
+                isSelected = tag.name == selectedTag,
+                onClick = { onTagSelected(tag) },
+                onLongClick = { onTagLongClicked(tag) }
             )
         }
         item {
@@ -355,11 +369,13 @@ fun AddTagButton(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TagChip(
-    text: String,
+    tag: TagEntity,
     isSelected: Boolean,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val backgroundColor = if (isSelected) Color(0xFF2CB67D) else Color(0xFF242629)
@@ -369,12 +385,15 @@ fun TagChip(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(backgroundColor)
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = if (!tag.isPreset) onLongClick else null
+            )
             .padding(horizontal = 16.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = text,
+            text = tag.name,
             color = textColor,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
@@ -421,5 +440,36 @@ fun AddTagDialog(
         containerColor = MaterialTheme.colorScheme.surface,
         titleContentColor = MaterialTheme.colorScheme.onSurface,
         textContentColor = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
+fun DeleteTagDialog(
+    tag: TagEntity,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Hapus Kategori?") },
+        text = {
+            Text(text = "Hapus kategori \"${tag.name}\"? Catatan transaksi lama yang menggunakan kategori ini tidak akan terhapus.")
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Hapus")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Batal")
+            }
+        },
+        containerColor = Color(0xFF242629),
+        titleContentColor = Color(0xFFFFFFFE),
+        textContentColor = Color(0xFF94A1B2)
     )
 }

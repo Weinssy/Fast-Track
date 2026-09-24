@@ -22,7 +22,8 @@ data class FastTrackUiState(
     val exportData: List<Expense>? = null,
     val selectedTag: String = "Umum",
     val availableTags: List<TagEntity> = emptyList(),
-    val showAddTagDialog: Boolean = false
+    val showAddTagDialog: Boolean = false,
+    val tagToDelete: TagEntity? = null
 )
 
 class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() {
@@ -32,6 +33,7 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     private val _exportData = MutableStateFlow<List<Expense>?>(null)
     private val _selectedTag = MutableStateFlow("Umum")
     private val _showAddTagDialog = MutableStateFlow(false)
+    private val _tagToDelete = MutableStateFlow<TagEntity?>(null)
 
     val uiState: StateFlow<FastTrackUiState> = combine(
         _currentInput,
@@ -41,7 +43,8 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
         _exportData,
         _selectedTag,
         repository.getAllTags(),
-        _showAddTagDialog
+        _showAddTagDialog,
+        _tagToDelete
     ) { inputs ->
         FastTrackUiState(
             currentInput = inputs[0] as String,
@@ -51,7 +54,8 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
             exportData = inputs[4] as List<Expense>?,
             selectedTag = inputs[5] as String,
             availableTags = inputs[6] as List<TagEntity>,
-            showAddTagDialog = inputs[7] as Boolean
+            showAddTagDialog = inputs[7] as Boolean,
+            tagToDelete = inputs[8] as TagEntity?
         )
     }.stateIn(
         scope = viewModelScope,
@@ -112,6 +116,20 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
                 _selectedTag.value = trimmed
                 _showAddTagDialog.value = false
             }
+        }
+    }
+
+    fun setTagToDelete(tag: TagEntity?) {
+        _tagToDelete.value = tag
+    }
+
+    fun deleteCustomTag(tag: TagEntity) {
+        viewModelScope.launch {
+            repository.deleteTag(tag)
+            if (_selectedTag.value == tag.name) {
+                _selectedTag.value = "Umum"
+            }
+            _tagToDelete.value = null
         }
     }
 
