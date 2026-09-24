@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0] - 2026-09-24
+### Added
+- **Dynamic Custom Tags**: Users can now create their own custom categories directly from the main screen by tapping the "+ Tambah" button.
+- **Database Migration**: Smoothly migrated from static tag lists to a fully dynamic database model using Room without any data loss.
+- **Legacy Normalization**: Older expenses marked as 'General' are automatically unified into 'Umum' for consistency.
+
 ## [1.3.1] - 2026-09-22
 ### Changed
 - **Bahasa Indonesia Localization**: Seluruh UI, format tanggal, dan mata uang (`Rp`) kini sepenuhnya menggunakan standar dan bahasa Indonesia secara konsisten.

@@ -2,13 +2,27 @@ package com.wein.fasttrack.repository
 
 import com.wein.fasttrack.data.Expense
 import com.wein.fasttrack.data.ExpenseDao
+import com.wein.fasttrack.data.TagDao
+import com.wein.fasttrack.data.TagEntity
 import com.wein.fasttrack.data.TagTotal
 import kotlinx.coroutines.flow.Flow
 import java.util.Calendar
 
-class ExpenseRepository(private val expenseDao: ExpenseDao) {
+class ExpenseRepository(
+    private val expenseDao: ExpenseDao,
+    private val tagDao: TagDao
+) {
 
-    private fun getStartOfDay(): Long {
+    fun getAllTags(): Flow<List<TagEntity>> = tagDao.getAllTags()
+
+    suspend fun insertTag(tag: TagEntity) = tagDao.insertTag(tag)
+
+    suspend fun deleteTag(tag: TagEntity) {
+        if (!tag.isPreset) {
+            tagDao.deleteTag(tag)
+        }
+    }
+
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)

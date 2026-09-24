@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -102,8 +103,10 @@ fun FastTrackScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             TagSelector(
+                tags = uiState.availableTags.map { it.name },
                 selectedTag = uiState.selectedTag,
                 onTagSelected = { viewModel.onTagSelected(it) },
+                onAddTagClicked = { viewModel.setShowAddTagDialog(true) },
                 modifier = Modifier.fillMaxWidth()
             )
             
@@ -114,6 +117,13 @@ fun FastTrackScreen(
                 onBackspace = { viewModel.onBackspacePressed() },
                 onSave = { viewModel.onSavePressed() },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            )
+        }
+        
+        if (uiState.showAddTagDialog) {
+            AddTagDialog(
+                onDismiss = { viewModel.setShowAddTagDialog(false) },
+                onConfirm = { viewModel.addNewTag(it) }
             )
         }
     }
@@ -295,12 +305,12 @@ fun KeypadButton(
 
 @Composable
 fun TagSelector(
+    tags: List<String>,
     selectedTag: String,
     onTagSelected: (String) -> Unit,
+    onAddTagClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tags = listOf("Umum", "Makan", "Transport", "Belanja", "Tagihan", "Jajan")
-    
     LazyRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -311,6 +321,35 @@ fun TagSelector(
                 text = tag,
                 isSelected = tag == selectedTag,
                 onClick = { onTagSelected(tag) }
+            )
+        }
+        item {
+            AddTagButton(onClick = onAddTagClicked)
+        }
+    }
+}
+
+@Composable
+fun AddTagButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFF242629))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.Add, contentDescription = "Tambah Tag", tint = Color(0xFF94A1B2), modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "Tambah",
+                color = Color(0xFF94A1B2),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
             )
         }
     }
@@ -341,4 +380,46 @@ fun TagChip(
             fontWeight = FontWeight.Medium
         )
     }
+}
+
+@Composable
+fun AddTagDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var text by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Tambah Kategori Baru") },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text("Nama Kategori") },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                )
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(text) },
+                enabled = text.trim().isNotEmpty()
+            ) {
+                Text("Simpan")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Batal")
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurface
+    )
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.wein.fasttrack.data.Expense
 import com.wein.fasttrack.repository.ExpenseRepository
+import com.wein.fasttrack.data.TagEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +20,9 @@ data class FastTrackUiState(
     val todayExpenses: List<Expense> = emptyList(),
     val isExporting: Boolean = false,
     val exportData: List<Expense>? = null,
-    val selectedTag: String = "Umum"
+    val selectedTag: String = "Umum",
+    val availableTags: List<TagEntity> = emptyList(),
+    val showAddTagDialog: Boolean = false
 )
 
 class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() {
@@ -28,6 +31,7 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     private val _isExporting = MutableStateFlow(false)
     private val _exportData = MutableStateFlow<List<Expense>?>(null)
     private val _selectedTag = MutableStateFlow("Umum")
+    private val _showAddTagDialog = MutableStateFlow(false)
 
     val uiState: StateFlow<FastTrackUiState> = combine(
         _currentInput,
@@ -35,7 +39,9 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
         repository.getTodayExpenses(),
         _isExporting,
         _exportData,
-        _selectedTag
+        _selectedTag,
+        repository.getAllTags(),
+        _showAddTagDialog
     ) { inputs ->
         FastTrackUiState(
             currentInput = inputs[0] as String,
@@ -43,7 +49,9 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
             todayExpenses = inputs[2] as List<Expense>,
             isExporting = inputs[3] as Boolean,
             exportData = inputs[4] as List<Expense>?,
-            selectedTag = inputs[5] as String
+            selectedTag = inputs[5] as String,
+            availableTags = inputs[6] as List<TagEntity>,
+            showAddTagDialog = inputs[7] as Boolean
         )
     }.stateIn(
         scope = viewModelScope,
@@ -89,6 +97,21 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     fun deleteExpense(expense: Expense) {
         viewModelScope.launch {
             repository.deleteExpense(expense)
+        }
+    }
+
+    fun setShowAddTagDialog(show: Boolean) {
+        _showAddTagDialog.value = show
+    }
+
+    fun addNewTag(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isNotEmpty()) {
+            viewModelScope.launch {
+                repository.insertTag(TagEntity(name = trimmed))
+                _selectedTag.value = trimmed
+                _showAddTagDialog.value = false
+            }
         }
     }
 
