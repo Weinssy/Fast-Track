@@ -2,7 +2,7 @@
 
 **Fast Track** adalah aplikasi Android untuk mencatat pengeluaran harian dengan cepat, sederhana, dan privat. Cukup masukkan nominal, pilih kategori bila diperlukan, lalu simpan—tanpa formulir panjang atau alur yang rumit.
 
-> **Versi saat ini:** 1.3.1  
+> **Versi saat ini:** 1.5.0  
 > **Platform:** Android 8.0 (API 26) atau lebih baru
 
 ## Mengapa Fast Track?
@@ -30,7 +30,7 @@ Pencatatan keuangan seharusnya tidak memerlukan banyak langkah. Fast Track dibua
 
 APK versi terbaru tersedia di repository:
 
-[Unduh Fast Track v1.3.1](https://github.com/Weinssy/Fast-Track/raw/main/Fast%20Track%20v1.3.1%20Signed.apk)
+[Unduh Fast Track v1.5.0](https://github.com/Weinssy/Fast-Track/raw/main/Fast%20Track%20v1.5.0%20Signed.apk)
 
 > Android mungkin meminta izin untuk memasang aplikasi dari sumber yang tidak dikenal. Pastikan hanya memasang APK dari sumber yang Anda percaya.
 
