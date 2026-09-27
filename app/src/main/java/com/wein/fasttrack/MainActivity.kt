@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
         val database = AppDatabase.getDatabase(applicationContext)
         val repository = ExpenseRepository(database.expenseDao(), database.tagDao())
         
-        val expenseFactory = ExpenseViewModelFactory(repository)
+        val expenseFactory = ExpenseViewModelFactory(application, repository)
         val expenseViewModel = ViewModelProvider(this, expenseFactory)[ExpenseViewModel::class.java]
         
         val analyticsFactory = AnalyticsViewModelFactory(repository)

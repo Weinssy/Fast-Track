@@ -22,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -298,12 +300,21 @@ fun KeypadButton(
     modifier: Modifier = Modifier,
     isAction: Boolean = false
 ) {
+    val haptic = LocalHapticFeedback.current
+    
     Box(
         modifier = modifier
             .aspectRatio(1.5f)
             .clip(RoundedCornerShape(16.dp))
             .background(if (isAction) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick),
+            .clickable(onClick = {
+                if (isAction) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                } else {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                }
+                onClick()
+            }),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -378,6 +389,7 @@ fun TagChip(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val haptic = LocalHapticFeedback.current
     val backgroundColor = if (isSelected) Color(0xFF2CB67D) else Color(0xFF242629)
     val textColor = if (isSelected) Color.White else Color(0xFF94A1B2)
     
@@ -386,7 +398,10 @@ fun TagChip(
             .clip(RoundedCornerShape(16.dp))
             .background(backgroundColor)
             .combinedClickable(
-                onClick = onClick,
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onClick()
+                },
                 onLongClick = if (!tag.isPreset) onLongClick else null
             )
             .padding(horizontal = 16.dp, vertical = 8.dp),

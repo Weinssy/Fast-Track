@@ -1,5 +1,7 @@
 package com.wein.fasttrack.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -13,6 +15,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.wein.fasttrack.widget.FastTrackWidget
+import androidx.glance.appwidget.updateAll
 
 data class FastTrackUiState(
     val currentInput: String = "",
@@ -26,7 +30,10 @@ data class FastTrackUiState(
     val tagToDelete: TagEntity? = null
 )
 
-class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() {
+class ExpenseViewModel(
+    application: Application,
+    private val repository: ExpenseRepository
+) : AndroidViewModel(application) {
 
     private val _currentInput = MutableStateFlow("")
     private val _isExporting = MutableStateFlow(false)
@@ -90,6 +97,7 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
                 repository.insertExpense(Expense(amount = amount, tag = _selectedTag.value))
                 _currentInput.value = ""
                 _selectedTag.value = "Umum"
+                FastTrackWidget().updateAll(getApplication())
             }
         }
     }
@@ -101,6 +109,7 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     fun deleteExpense(expense: Expense) {
         viewModelScope.launch {
             repository.deleteExpense(expense)
+            FastTrackWidget().updateAll(getApplication())
         }
     }
 
@@ -147,11 +156,14 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     }
 }
 
-class ExpenseViewModelFactory(private val repository: ExpenseRepository) : ViewModelProvider.Factory {
+class ExpenseViewModelFactory(
+    private val application: Application,
+    private val repository: ExpenseRepository
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ExpenseViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ExpenseViewModel(repository) as T
+            return ExpenseViewModel(application, repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

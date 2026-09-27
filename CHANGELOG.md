@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.0] - 2026-09-27
+### Added
+- **Home Screen Widget**: Added a Jetpack Glance widget for instantly viewing today's expenses.
+- **Haptic Feedback**: Implemented tactile micro-haptics across the keypad, tags, and confirm button to mimic physical mechanical input.
+
+### Changed
+- **Widget Updates**: Optimized to be purely event-driven from database state changes (no background polling).
+
 ## [1.5.0] - 2026-09-24
 ### Added
 - **Long-Press Deletion**: Added long-press gesture on custom category chips to prompt deletion.
