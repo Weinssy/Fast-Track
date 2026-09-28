@@ -27,6 +27,7 @@ import androidx.glance.text.TextStyle
 import com.wein.fasttrack.MainActivity
 import com.wein.fasttrack.data.AppDatabase
 import com.wein.fasttrack.repository.ExpenseRepository
+import com.wein.fasttrack.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.text.NumberFormat
@@ -36,20 +37,26 @@ class FastTrackWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val database = AppDatabase.getDatabase(context)
         val repository = ExpenseRepository(database.expenseDao(), database.tagDao())
+        val userPrefs = UserPreferencesRepository(context)
         val todayTotal = try {
             repository.getTodayTotal().first() ?: 0L
         } catch (e: Exception) {
             0L
         }
+        val budgetCap = try {
+            userPrefs.dailyBudgetCap.first()
+        } catch (e: Exception) {
+            0L
+        }
 
         provideContent {
-            FastTrackWidgetContent(todayTotal)
+            FastTrackWidgetContent(todayTotal, budgetCap)
         }
     }
 }
 
 @Composable
-fun FastTrackWidgetContent(todayTotal: Long) {
+fun FastTrackWidgetContent(todayTotal: Long, budgetCap: Long) {
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply {
         maximumFractionDigits = 0
     }
@@ -76,10 +83,17 @@ fun FastTrackWidgetContent(todayTotal: Long) {
                     fontSize = 14.sp
                 )
             )
+            val amountColor = when {
+                budgetCap == 0L -> Color(0xFFFFFFFE)
+                todayTotal >= budgetCap -> Color(0xFFE53E3E)
+                todayTotal >= budgetCap * 0.8 -> Color(0xFFF6AD55)
+                else -> Color(0xFFFFFFFE)
+            }
+            
             Text(
                 text = currencyFormat.format(todayTotal),
                 style = TextStyle(
-                    color = androidx.glance.unit.ColorProvider(Color(0xFFFFFFFE)),
+                    color = androidx.glance.unit.ColorProvider(amountColor),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 ),

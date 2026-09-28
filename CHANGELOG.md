@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0] - 2026-09-28
+### Added
+- **Quick Undo**: Added a 3-second Snackbar with an "Urungkan" action immediately after saving an expense to recover from typos.
+- **Daily Spending Cap**: Introduced an optional daily budget cap setting with visual color indicators (Normal, Warning, Exceeded) on the main screen and Glance widget.
+
+### Changed
+- **Widget Consistency**: The Glance widget now reflects the daily spending cap color status in real-time without background polling.
 ## [1.6.0] - 2026-09-27
 ### Added
 - **Home Screen Widget**: Added a Jetpack Glance widget for instantly viewing today's expenses.

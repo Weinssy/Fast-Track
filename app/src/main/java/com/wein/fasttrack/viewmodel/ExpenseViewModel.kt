@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.wein.fasttrack.data.Expense
 import com.wein.fasttrack.repository.ExpenseRepository
+import com.wein.fasttrack.repository.UserPreferencesRepository
 import com.wein.fasttrack.data.TagEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,12 +28,20 @@ data class FastTrackUiState(
     val selectedTag: String = "Umum",
     val availableTags: List<TagEntity> = emptyList(),
     val showAddTagDialog: Boolean = false,
-    val tagToDelete: TagEntity? = null
+    val tagToDelete: TagEntity? = null,
+    val budgetCap: Long = 0L,
+    val spendingStatus: SpendingStatus = SpendingStatus.NORMAL,
+    val undoExpenseEvent: Expense? = null
 )
+
+enum class SpendingStatus {
+    NORMAL, WARNING, EXCEEDED
+}
 
 class ExpenseViewModel(
     application: Application,
-    private val repository: ExpenseRepository
+    private val repository: ExpenseRepository,
+    private val userPrefs: UserPreferencesRepository
 ) : AndroidViewModel(application) {
 
     private val _currentInput = MutableStateFlow("")
@@ -41,6 +50,8 @@ class ExpenseViewModel(
     private val _selectedTag = MutableStateFlow("Umum")
     private val _showAddTagDialog = MutableStateFlow(false)
     private val _tagToDelete = MutableStateFlow<TagEntity?>(null)
+    private val _undoExpenseEvent = MutableStateFlow<Expense?>(null)
+    private var lastInsertedExpense: Expense? = null
 
     val uiState: StateFlow<FastTrackUiState> = combine(
         _currentInput,
@@ -51,18 +62,33 @@ class ExpenseViewModel(
         _selectedTag,
         repository.getAllTags(),
         _showAddTagDialog,
-        _tagToDelete
+        _tagToDelete,
+        userPrefs.dailyBudgetCap,
+        _undoExpenseEvent
     ) { inputs ->
+        val total = inputs[1] as? Long ?: 0L
+        val cap = inputs[9] as Long
+        
+        val status = when {
+            cap == 0L -> SpendingStatus.NORMAL
+            total >= cap -> SpendingStatus.EXCEEDED
+            total >= cap * 0.8 -> SpendingStatus.WARNING
+            else -> SpendingStatus.NORMAL
+        }
+
         FastTrackUiState(
             currentInput = inputs[0] as String,
-            todayTotal = inputs[1] as? Long ?: 0L,
+            todayTotal = total,
             todayExpenses = inputs[2] as List<Expense>,
             isExporting = inputs[3] as Boolean,
             exportData = inputs[4] as List<Expense>?,
             selectedTag = inputs[5] as String,
             availableTags = inputs[6] as List<TagEntity>,
             showAddTagDialog = inputs[7] as Boolean,
-            tagToDelete = inputs[8] as TagEntity?
+            tagToDelete = inputs[8] as TagEntity?,
+            budgetCap = cap,
+            spendingStatus = status,
+            undoExpenseEvent = inputs[10] as Expense?
         )
     }.stateIn(
         scope = viewModelScope,
@@ -94,9 +120,32 @@ class ExpenseViewModel(
         val amount = _currentInput.value.toLongOrNull()
         if (amount != null && amount > 0) {
             viewModelScope.launch {
-                repository.insertExpense(Expense(amount = amount, tag = _selectedTag.value))
+                val expenseToInsert = Expense(amount = amount, tag = _selectedTag.value)
+                val id = repository.insertExpense(expenseToInsert)
+                val insertedExpense = expenseToInsert.copy(id = id)
+                
+                lastInsertedExpense = insertedExpense
+                _undoExpenseEvent.value = insertedExpense
+                
                 _currentInput.value = ""
                 _selectedTag.value = "Umum"
+                FastTrackWidget().updateAll(getApplication())
+            }
+        }
+    }
+
+    fun onUndoEventHandled() {
+        _undoExpenseEvent.value = null
+    }
+
+    fun onUndoLastExpense() {
+        lastInsertedExpense?.let { expense ->
+            viewModelScope.launch {
+                repository.deleteExpense(expense)
+                _currentInput.value = expense.amount.toString()
+                _selectedTag.value = expense.tag ?: "Umum"
+                lastInsertedExpense = null
+                _undoExpenseEvent.value = null
                 FastTrackWidget().updateAll(getApplication())
             }
         }
@@ -154,16 +203,24 @@ class ExpenseViewModel(
     fun onExportHandled() {
         _exportData.value = null
     }
+
+    fun setDailyBudgetCap(amount: Long) {
+        viewModelScope.launch {
+            userPrefs.setDailyBudgetCap(amount)
+            FastTrackWidget().updateAll(getApplication())
+        }
+    }
 }
 
 class ExpenseViewModelFactory(
     private val application: Application,
-    private val repository: ExpenseRepository
+    private val repository: ExpenseRepository,
+    private val userPrefs: UserPreferencesRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ExpenseViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ExpenseViewModel(application, repository) as T
+            return ExpenseViewModel(application, repository, userPrefs) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

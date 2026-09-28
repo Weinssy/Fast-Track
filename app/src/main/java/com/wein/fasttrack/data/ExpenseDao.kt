@@ -26,7 +26,7 @@ interface ExpenseDao {
     suspend fun getTagTotalsBetween(startTime: Long, endTime: Long): List<TagTotal>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(expense: Expense)
+    suspend fun insert(expense: Expense): Long
 
     @Delete
     suspend fun delete(expense: Expense)

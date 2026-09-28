@@ -61,8 +61,8 @@ class ExpenseRepository(
         return expenseDao.getTodayTotal(getStartOfDay(), getEndOfDay())
     }
 
-    suspend fun insertExpense(expense: Expense) {
-        expenseDao.insert(expense)
+    suspend fun insertExpense(expense: Expense): Long {
+        return expenseDao.insert(expense)
     }
 
     suspend fun deleteExpense(expense: Expense) {

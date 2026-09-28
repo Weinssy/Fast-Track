@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,6 +36,7 @@ import com.wein.fasttrack.data.TagEntity
 import com.wein.fasttrack.utils.CsvExporter
 import com.wein.fasttrack.viewmodel.ExpenseViewModel
 import com.wein.fasttrack.viewmodel.FastTrackUiState
+import com.wein.fasttrack.viewmodel.SpendingStatus
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -48,6 +50,22 @@ fun FastTrackScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showBudgetDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.undoExpenseEvent) {
+        uiState.undoExpenseEvent?.let { expense ->
+            val result = snackbarHostState.showSnackbar(
+                message = "Catatan tersimpan",
+                actionLabel = "Urungkan",
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.onUndoLastExpense()
+            }
+            viewModel.onUndoEventHandled()
+        }
+    }
 
     LaunchedEffect(uiState.exportData) {
         uiState.exportData?.let { expenses ->
@@ -61,10 +79,14 @@ fun FastTrackScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Fast Track") },
                 actions = {
+                    IconButton(onClick = { showBudgetDialog = true }) {
+                        Icon(Icons.Default.Settings, contentDescription = "Pengaturan Batas Harian")
+                    }
                     IconButton(onClick = onNavigateToAnalytics) {
                         Icon(Icons.Default.List, contentDescription = "View Analytics")
                     }
@@ -140,6 +162,17 @@ fun FastTrackScreen(
                 onConfirm = { viewModel.deleteCustomTag(tag) }
             )
         }
+
+        if (showBudgetDialog) {
+            BudgetDialog(
+                currentCap = uiState.budgetCap,
+                onDismiss = { showBudgetDialog = false },
+                onConfirm = { 
+                    viewModel.setDailyBudgetCap(it)
+                    showBudgetDialog = false 
+                }
+            )
+        }
     }
 }
 
@@ -169,9 +202,16 @@ fun HeroDisplay(
             fontSize = 16.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
+        
+        val amountColor = when (uiState.spendingStatus) {
+            SpendingStatus.NORMAL -> MaterialTheme.colorScheme.onBackground
+            SpendingStatus.WARNING -> Color(0xFFF6AD55)
+            SpendingStatus.EXCEEDED -> Color(0xFFE53E3E)
+        }
+        
         Text(
             text = displayAmount,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = amountColor,
             fontSize = 56.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Monospace,
@@ -486,5 +526,49 @@ fun DeleteTagDialog(
         containerColor = Color(0xFF242629),
         titleContentColor = Color(0xFFFFFFFE),
         textContentColor = Color(0xFF94A1B2)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BudgetDialog(
+    currentCap: Long,
+    onDismiss: () -> Unit,
+    onConfirm: (Long) -> Unit
+) {
+    var text by remember { mutableStateOf(if (currentCap > 0) currentCap.toString() else "") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Pengaturan Batas Harian") },
+        text = {
+            Column {
+                Text(text = "Tentukan batas pengeluaran harian. Kosongkan atau isi 0 untuk menonaktifkan.", color = Color(0xFF94A1B2))
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = Color.Gray,
+                        focusedTextColor = Color(0xFFFFFFFE),
+                        unfocusedTextColor = Color(0xFFFFFFFE)
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(text.toLongOrNull() ?: 0L) }) {
+                Text("Simpan")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Batal")
+            }
+        },
+        containerColor = Color(0xFF242629),
+        titleContentColor = Color(0xFFFFFFFE)
     )
 }
