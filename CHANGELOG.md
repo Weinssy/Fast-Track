@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.0] - 2026-09-29
+### Added
+- **Production Milestone**: Fast Track is now a production-grade application optimized for performance.
+- **Baseline Profiles**: Added Baseline Profiles to significantly reduce cold startup time and eliminate initial JIT jank.
+- **App Shortcuts**: Added Static App Shortcuts ("Catat Cepat" and "Analitik") to directly jump into specific screens from the launcher.
+- **ProGuard / R8 Hardening**: Fully audited shrinking and obfuscation rules for release builds to reduce APK size and ensure stability.
 ## [1.9.0] - 2026-09-29
 ### Added
 - **Optional Local Biometric Authentication**: Added ability to lock the app using device fingerprint, face unlock, or PIN to protect financial privacy.

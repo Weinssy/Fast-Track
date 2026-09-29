@@ -11,4 +11,8 @@
     <string name="daily_trend">Tren Harian</string>
     <string name="category_breakdown">Pembagian Kategori</string>
     <string name="tag_umum">Umum</string>
+    <string name="shortcut_entry_short">Catat Cepat</string>
+    <string name="shortcut_entry_long">Catat Pengeluaran Baru</string>
+    <string name="shortcut_analytics_short">Analitik</string>
+    <string name="shortcut_analytics_long">Lihat Analitik Pengeluaran</string>
 </resources>

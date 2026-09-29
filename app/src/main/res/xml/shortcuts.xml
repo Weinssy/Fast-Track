@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="shortcut_quick_entry"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_add"
+        android:shortcutShortLabel="@string/shortcut_entry_short"
+        android:shortcutLongLabel="@string/shortcut_entry_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.wein.fasttrack"
+            android:targetClass="com.wein.fasttrack.MainActivity">
+            <extra android:name="shortcut" android:value="entry" />
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="shortcut_analytics"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:shortcutShortLabel="@string/shortcut_analytics_short"
+        android:shortcutLongLabel="@string/shortcut_analytics_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.wein.fasttrack"
+            android:targetClass="com.wein.fasttrack.MainActivity">
+            <extra android:name="shortcut" android:value="analytics" />
+        </intent>
+    </shortcut>
+</shortcuts>

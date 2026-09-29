@@ -1,0 +1,4 @@
+-keep class com.wein.fasttrack.data.Expense { *; }
+-keep class com.wein.fasttrack.data.TagEntity { *; }
+-keep class com.wein.fasttrack.data.BackupPayload { *; }
+-keep class com.wein.fasttrack.widget.** { *; }

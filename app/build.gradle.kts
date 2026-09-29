@@ -13,8 +13,8 @@ android {
         applicationId = "com.wein.fasttrack"
         minSdk = 26
         targetSdk = 35
-        versionCode = 11
-        versionName = "1.9.0"
+        versionCode = 12
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -56,6 +56,7 @@ dependencies {
     val glanceVersion = "1.1.0"
 
     implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
+    implementation("androidx.profileinstaller:profileinstaller:1.3.1")
     implementation("androidx.glance:glance-appwidget:$glanceVersion")
     implementation("androidx.glance:glance-material3:$glanceVersion")
     implementation("androidx.datastore:datastore-preferences:1.0.0")

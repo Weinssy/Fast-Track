@@ -25,12 +25,17 @@ import com.wein.fasttrack.viewmodel.AnalyticsViewModelFactory
 import com.wein.fasttrack.viewmodel.ExpenseViewModelFactory
 import com.wein.fasttrack.utils.BiometricAuthManager
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import android.content.Intent
 
 enum class Screen { MAIN, ANALYTICS }
 
 class MainActivity : FragmentActivity() {
+    private val currentScreenState = MutableStateFlow(Screen.MAIN)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        handleIntent(intent)
         
         val database = AppDatabase.getDatabase(applicationContext)
         val repository = ExpenseRepository(database, database.expenseDao(), database.tagDao())
@@ -59,7 +64,7 @@ class MainActivity : FragmentActivity() {
         }
 
         setContent {
-            var currentScreen by remember { mutableStateOf(Screen.MAIN) }
+            val currentScreen by currentScreenState.collectAsState()
             val isBiometricEnabled by userPrefs.isBiometricEnabled.collectAsState(initial = false)
             val isAppUnlocked by BiometricAuthManager.isAppUnlocked.collectAsState()
 
@@ -81,19 +86,33 @@ class MainActivity : FragmentActivity() {
                             Screen.MAIN -> {
                                 FastTrackScreen(
                                     viewModel = expenseViewModel,
-                                    onNavigateToAnalytics = { currentScreen = Screen.ANALYTICS },
+                                    onNavigateToAnalytics = { currentScreenState.value = Screen.ANALYTICS },
                                     activity = this@MainActivity
                                 )
                             }
                             Screen.ANALYTICS -> {
                                 AnalyticsScreen(
                                     viewModel = analyticsViewModel,
-                                    onNavigateBack = { currentScreen = Screen.MAIN }
+                                    onNavigateBack = { currentScreenState.value = Screen.MAIN }
                                 )
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        intent?.getStringExtra("shortcut")?.let { shortcut ->
+            when (shortcut) {
+                "entry" -> currentScreenState.value = Screen.MAIN
+                "analytics" -> currentScreenState.value = Screen.ANALYTICS
             }
         }
     }
