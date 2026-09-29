@@ -36,7 +36,7 @@ import java.util.Locale
 class FastTrackWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val database = AppDatabase.getDatabase(context)
-        val repository = ExpenseRepository(database.expenseDao(), database.tagDao())
+        val repository = ExpenseRepository(database, database.expenseDao(), database.tagDao())
         val userPrefs = UserPreferencesRepository(context)
         val todayTotal = try {
             repository.getTodayTotal().first() ?: 0L

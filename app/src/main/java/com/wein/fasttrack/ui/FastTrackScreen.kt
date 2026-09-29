@@ -16,6 +16,8 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,6 +54,26 @@ fun FastTrackScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     var showBudgetDialog by remember { mutableStateOf(false) }
+    var showRestoreWarning by remember { mutableStateOf(false) }
+
+    val createDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri?.let { viewModel.createBackup(it) }
+    }
+
+    val openDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.restoreBackup(it) }
+    }
+
+    LaunchedEffect(uiState.backupRestoreMessage) {
+        uiState.backupRestoreMessage?.let { message ->
+            snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Short)
+            viewModel.onBackupRestoreMessageHandled()
+        }
+    }
 
     LaunchedEffect(uiState.undoExpenseEvent) {
         uiState.undoExpenseEvent?.let { expense ->
@@ -166,10 +188,37 @@ fun FastTrackScreen(
         if (showBudgetDialog) {
             BudgetDialog(
                 currentCap = uiState.budgetCap,
+                isBackupRestoring = uiState.isBackupRestoring,
                 onDismiss = { showBudgetDialog = false },
                 onConfirm = { 
                     viewModel.setDailyBudgetCap(it)
                     showBudgetDialog = false 
+                },
+                onBackupClick = {
+                    showBudgetDialog = false
+                    val timestamp = System.currentTimeMillis()
+                    createDocumentLauncher.launch("fast_track_backup_$timestamp.json")
+                },
+                onRestoreClick = {
+                    showBudgetDialog = false
+                    showRestoreWarning = true
+                }
+            )
+        }
+
+        if (showRestoreWarning) {
+            AlertDialog(
+                onDismissRequest = { showRestoreWarning = false },
+                title = { Text("Peringatan") },
+                text = { Text("Data saat ini akan digantikan oleh isi file cadangan. Lanjutkan?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showRestoreWarning = false
+                        openDocumentLauncher.launch(arrayOf("application/json", "*/*"))
+                    }) { Text("Lanjutkan") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showRestoreWarning = false }) { Text("Batal") }
                 }
             )
         }
@@ -533,14 +582,17 @@ fun DeleteTagDialog(
 @Composable
 fun BudgetDialog(
     currentCap: Long,
+    isBackupRestoring: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (Long) -> Unit
+    onConfirm: (Long) -> Unit,
+    onBackupClick: () -> Unit,
+    onRestoreClick: () -> Unit
 ) {
     var text by remember { mutableStateOf(if (currentCap > 0) currentCap.toString() else "") }
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Pengaturan Batas Harian") },
+        title = { Text(text = "Pengaturan") },
         text = {
             Column {
                 Text(text = "Tentukan batas pengeluaran harian. Kosongkan atau isi 0 untuk menonaktifkan.", color = Color(0xFF94A1B2))
@@ -556,6 +608,25 @@ fun BudgetDialog(
                         unfocusedTextColor = Color(0xFFFFFFFE)
                     )
                 )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                HorizontalDivider(color = Color.DarkGray)
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                if (isBackupRestoring) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                } else {
+                    OutlinedButton(onClick = onBackupClick, modifier = Modifier.fillMaxWidth()) {
+                        Text("Cadangkan Data (JSON)")
+                    }
+                    OutlinedButton(
+                        onClick = onRestoreClick, 
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Pulihkan Data (JSON)")
+                    }
+                }
             }
         },
         confirmButton = {

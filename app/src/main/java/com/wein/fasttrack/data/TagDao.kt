@@ -20,4 +20,10 @@ interface TagDao {
     
     @Query("SELECT COUNT(*) FROM tags")
     suspend fun getTagCount(): Int
+    
+    @Query("DELETE FROM tags WHERE isPreset = 0")
+    suspend fun deleteNonPresetTags()
+    
+    @Query("SELECT * FROM tags")
+    suspend fun getAllTagsSync(): List<TagEntity>
 }

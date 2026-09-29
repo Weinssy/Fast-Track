@@ -8,7 +8,11 @@ import com.wein.fasttrack.data.TagTotal
 import kotlinx.coroutines.flow.Flow
 import java.util.Calendar
 
+import com.wein.fasttrack.data.AppDatabase
+import androidx.room.withTransaction
+
 class ExpenseRepository(
+    private val database: AppDatabase,
     private val expenseDao: ExpenseDao,
     private val tagDao: TagDao
 ) {
@@ -67,5 +71,17 @@ class ExpenseRepository(
 
     suspend fun deleteExpense(expense: Expense) {
         expenseDao.delete(expense)
+    }
+
+    suspend fun getAllTagsSync(): List<TagEntity> = tagDao.getAllTagsSync()
+
+    suspend fun restoreDatabase(tags: List<TagEntity>, expenses: List<Expense>) {
+        database.withTransaction {
+            expenseDao.deleteAllExpenses()
+            tagDao.deleteNonPresetTags()
+            
+            tags.forEach { tagDao.insertTag(it) }
+            expenses.forEach { expenseDao.insert(it) }
+        }
     }
 }

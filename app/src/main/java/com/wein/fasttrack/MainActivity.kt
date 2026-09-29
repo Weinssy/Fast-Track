@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         val database = AppDatabase.getDatabase(applicationContext)
-        val repository = ExpenseRepository(database.expenseDao(), database.tagDao())
+        val repository = ExpenseRepository(database, database.expenseDao(), database.tagDao())
         
         val userPrefs = com.wein.fasttrack.repository.UserPreferencesRepository(applicationContext)
         val expenseFactory = ExpenseViewModelFactory(application, repository, userPrefs)

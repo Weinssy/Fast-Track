@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.8.0] - 2026-09-29
+### Added
+- **Full Local Backup & Restore**: Added the ability to backup all expenses, custom categories, and daily budget cap into a portable JSON file.
+- **Safe Recovery**: The restore process ensures atomicity using Room `@Transaction`, safeguarding against corrupt JSON files or interrupted processes.
+- **Android Storage Access Framework (SAF)**: Utilizes modern, permission-less storage APIs to read and write backup files securely anywhere on the device.
+
 ## [1.7.0] - 2026-09-28
 ### Added
 - **Quick Undo**: Added a 3-second Snackbar with an "Urungkan" action immediately after saving an expense to recover from typos.

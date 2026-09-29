@@ -16,8 +16,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.wein.fasttrack.widget.FastTrackWidget
 import androidx.glance.appwidget.updateAll
+import android.net.Uri
+import com.wein.fasttrack.data.BackupPayload
+import com.wein.fasttrack.utils.BackupManager
+import com.wein.fasttrack.widget.FastTrackWidget
+import kotlinx.coroutines.flow.first
 
 data class FastTrackUiState(
     val currentInput: String = "",
@@ -31,7 +35,9 @@ data class FastTrackUiState(
     val tagToDelete: TagEntity? = null,
     val budgetCap: Long = 0L,
     val spendingStatus: SpendingStatus = SpendingStatus.NORMAL,
-    val undoExpenseEvent: Expense? = null
+    val undoExpenseEvent: Expense? = null,
+    val backupRestoreMessage: String? = null,
+    val isBackupRestoring: Boolean = false
 )
 
 enum class SpendingStatus {
@@ -51,6 +57,8 @@ class ExpenseViewModel(
     private val _showAddTagDialog = MutableStateFlow(false)
     private val _tagToDelete = MutableStateFlow<TagEntity?>(null)
     private val _undoExpenseEvent = MutableStateFlow<Expense?>(null)
+    private val _backupRestoreMessage = MutableStateFlow<String?>(null)
+    private val _isBackupRestoring = MutableStateFlow(false)
     private var lastInsertedExpense: Expense? = null
 
     val uiState: StateFlow<FastTrackUiState> = combine(
@@ -64,7 +72,9 @@ class ExpenseViewModel(
         _showAddTagDialog,
         _tagToDelete,
         userPrefs.dailyBudgetCap,
-        _undoExpenseEvent
+        _undoExpenseEvent,
+        _backupRestoreMessage,
+        _isBackupRestoring
     ) { inputs ->
         val total = inputs[1] as? Long ?: 0L
         val cap = inputs[9] as Long
@@ -88,7 +98,9 @@ class ExpenseViewModel(
             tagToDelete = inputs[8] as TagEntity?,
             budgetCap = cap,
             spendingStatus = status,
-            undoExpenseEvent = inputs[10] as Expense?
+            undoExpenseEvent = inputs[10] as Expense?,
+            backupRestoreMessage = inputs[11] as String?,
+            isBackupRestoring = inputs[12] as Boolean
         )
     }.stateIn(
         scope = viewModelScope,
@@ -129,7 +141,7 @@ class ExpenseViewModel(
                 
                 _currentInput.value = ""
                 _selectedTag.value = "Umum"
-                FastTrackWidget().updateAll(getApplication())
+                com.wein.fasttrack.widget.FastTrackWidget().updateAll(getApplication())
             }
         }
     }
@@ -146,7 +158,7 @@ class ExpenseViewModel(
                 _selectedTag.value = expense.tag ?: "Umum"
                 lastInsertedExpense = null
                 _undoExpenseEvent.value = null
-                FastTrackWidget().updateAll(getApplication())
+                com.wein.fasttrack.widget.FastTrackWidget().updateAll(getApplication())
             }
         }
     }
@@ -158,7 +170,7 @@ class ExpenseViewModel(
     fun deleteExpense(expense: Expense) {
         viewModelScope.launch {
             repository.deleteExpense(expense)
-            FastTrackWidget().updateAll(getApplication())
+            com.wein.fasttrack.widget.FastTrackWidget().updateAll(getApplication())
         }
     }
 
@@ -207,7 +219,53 @@ class ExpenseViewModel(
     fun setDailyBudgetCap(amount: Long) {
         viewModelScope.launch {
             userPrefs.setDailyBudgetCap(amount)
-            FastTrackWidget().updateAll(getApplication())
+            com.wein.fasttrack.widget.FastTrackWidget().updateAll(getApplication())
+        }
+    }
+
+    fun onBackupRestoreMessageHandled() {
+        _backupRestoreMessage.value = null
+    }
+
+    fun createBackup(uri: Uri) {
+        viewModelScope.launch {
+            _isBackupRestoring.value = true
+            val tags = repository.getAllTagsSync()
+            val expenses = repository.getAllExpenses()
+            val cap = userPrefs.dailyBudgetCap.first()
+            val payload = BackupPayload(
+                exportedAt = System.currentTimeMillis(),
+                dailyBudgetCap = cap,
+                tags = tags,
+                expenses = expenses
+            )
+            val result = BackupManager.createBackup(getApplication(), uri, payload)
+            result.onSuccess { count ->
+                _backupRestoreMessage.value = "Berhasil mencadangkan $count transaksi."
+            }.onFailure {
+                _backupRestoreMessage.value = "Gagal mencadangkan: ${it.localizedMessage}"
+            }
+            _isBackupRestoring.value = false
+        }
+    }
+
+    fun restoreBackup(uri: Uri) {
+        viewModelScope.launch {
+            _isBackupRestoring.value = true
+            val result = BackupManager.restoreBackup(getApplication(), uri)
+            result.onSuccess { payload ->
+                try {
+                    repository.restoreDatabase(payload.tags, payload.expenses)
+                    userPrefs.setDailyBudgetCap(payload.dailyBudgetCap)
+                    _backupRestoreMessage.value = "Pemulihan berhasil: ${payload.expenses.size} transaksi dipulihkan"
+                    com.wein.fasttrack.widget.FastTrackWidget().updateAll(getApplication())
+                } catch (e: Exception) {
+                    _backupRestoreMessage.value = "Gagal menyimpan ke database: ${e.localizedMessage}"
+                }
+            }.onFailure {
+                _backupRestoreMessage.value = "Gagal membaca berkas: ${it.localizedMessage}"
+            }
+            _isBackupRestoring.value = false
         }
     }
 }
