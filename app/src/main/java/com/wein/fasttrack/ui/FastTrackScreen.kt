@@ -43,11 +43,15 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
+import androidx.fragment.app.FragmentActivity
+import com.wein.fasttrack.utils.BiometricAuthManager
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FastTrackScreen(
     viewModel: ExpenseViewModel,
     onNavigateToAnalytics: () -> Unit,
+    activity: FragmentActivity,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -189,10 +193,15 @@ fun FastTrackScreen(
             BudgetDialog(
                 currentCap = uiState.budgetCap,
                 isBackupRestoring = uiState.isBackupRestoring,
+                isBiometricEnabled = uiState.isBiometricEnabled,
+                activity = activity,
                 onDismiss = { showBudgetDialog = false },
                 onConfirm = { 
                     viewModel.setDailyBudgetCap(it)
                     showBudgetDialog = false 
+                },
+                onBiometricToggle = { enabled ->
+                    viewModel.setBiometricEnabled(enabled)
                 },
                 onBackupClick = {
                     showBudgetDialog = false
@@ -583,12 +592,17 @@ fun DeleteTagDialog(
 fun BudgetDialog(
     currentCap: Long,
     isBackupRestoring: Boolean,
+    isBiometricEnabled: Boolean,
+    activity: FragmentActivity,
     onDismiss: () -> Unit,
     onConfirm: (Long) -> Unit,
+    onBiometricToggle: (Boolean) -> Unit,
     onBackupClick: () -> Unit,
     onRestoreClick: () -> Unit
 ) {
     var text by remember { mutableStateOf(if (currentCap > 0) currentCap.toString() else "") }
+    var biometricChecked by remember { mutableStateOf(isBiometricEnabled) }
+    val context = LocalContext.current
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -610,6 +624,40 @@ fun BudgetDialog(
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
+                HorizontalDivider(color = Color.DarkGray)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "Kunci Biometrik", color = Color(0xFFFFFFFE), modifier = Modifier.weight(1f))
+                    Switch(
+                        checked = biometricChecked,
+                        onCheckedChange = { isChecked ->
+                            if (isChecked) {
+                                if (!BiometricAuthManager.canAuthenticate(context)) {
+                                    android.widget.Toast.makeText(context, "Perangkat tidak memiliki biometrik atau PIN aktif.", android.widget.Toast.LENGTH_SHORT).show()
+                                    biometricChecked = false
+                                } else {
+                                    BiometricAuthManager.authenticate(
+                                        activity = activity,
+                                        onSuccess = {
+                                            biometricChecked = true
+                                            onBiometricToggle(true)
+                                        },
+                                        onError = { err ->
+                                            android.widget.Toast.makeText(context, err, android.widget.Toast.LENGTH_SHORT).show()
+                                            biometricChecked = false
+                                        }
+                                    )
+                                }
+                            } else {
+                                biometricChecked = false
+                                onBiometricToggle(false)
+                            }
+                        }
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider(color = Color.DarkGray)
                 Spacer(modifier = Modifier.height(16.dp))
                 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.9.0] - 2026-09-29
+### Added
+- **Optional Local Biometric Authentication**: Added ability to lock the app using device fingerprint, face unlock, or PIN to protect financial privacy.
+- **Smart Grace Period**: Included a 60-second grace period that bypasses the biometric prompt if returning to the app quickly.
+- **Task Switcher Privacy**: Financial figures are now obscured in the Android Recent Apps / Task Switcher when the app is locked.
 ## [1.8.0] - 2026-09-29
 ### Added
 - **Full Local Backup & Restore**: Added the ability to backup all expenses, custom categories, and daily budget cap into a portable JSON file.

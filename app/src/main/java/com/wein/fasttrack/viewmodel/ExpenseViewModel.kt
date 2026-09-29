@@ -37,7 +37,8 @@ data class FastTrackUiState(
     val spendingStatus: SpendingStatus = SpendingStatus.NORMAL,
     val undoExpenseEvent: Expense? = null,
     val backupRestoreMessage: String? = null,
-    val isBackupRestoring: Boolean = false
+    val isBackupRestoring: Boolean = false,
+    val isBiometricEnabled: Boolean = false
 )
 
 enum class SpendingStatus {
@@ -74,10 +75,12 @@ class ExpenseViewModel(
         userPrefs.dailyBudgetCap,
         _undoExpenseEvent,
         _backupRestoreMessage,
-        _isBackupRestoring
+        _isBackupRestoring,
+        userPrefs.isBiometricEnabled
     ) { inputs ->
         val total = inputs[1] as? Long ?: 0L
         val cap = inputs[9] as Long
+        val biometricEnabled = inputs[13] as Boolean
         
         val status = when {
             cap == 0L -> SpendingStatus.NORMAL
@@ -100,7 +103,8 @@ class ExpenseViewModel(
             spendingStatus = status,
             undoExpenseEvent = inputs[10] as Expense?,
             backupRestoreMessage = inputs[11] as String?,
-            isBackupRestoring = inputs[12] as Boolean
+            isBackupRestoring = inputs[12] as Boolean,
+            isBiometricEnabled = biometricEnabled
         )
     }.stateIn(
         scope = viewModelScope,
@@ -220,6 +224,12 @@ class ExpenseViewModel(
         viewModelScope.launch {
             userPrefs.setDailyBudgetCap(amount)
             com.wein.fasttrack.widget.FastTrackWidget().updateAll(getApplication())
+        }
+    }
+
+    fun setBiometricEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            userPrefs.setBiometricEnabled(enabled)
         }
     }
 
