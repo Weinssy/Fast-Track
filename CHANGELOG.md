@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.0.0] - 2026-11-25
+### Added
+- **Split Bill & Sinkron Otomatis**: Fitur pembagian tagihan multi-sesi terintegrasi penuh dengan pembagian rata atau berbasis porsi/bobot desimal, pajak (%) & diskon, kalkulasi transfer minimal, status lunas, ringkasan WhatsApp, ekspor/impor JSON & tautan nota `split-bill-kelompok`, serta sinkronisasi otomatis jatah "Saya" ke pengeluaran pribadi tanpa duplikasi.
+- **Catatan & Edit Transaksi**: Input catatan opsional (`+ Catatan`), tombol cepat `000` pada keypad, serta dialog edit nominal, kategori, dan catatan (beserta tautan langsung ke sesi Split Bill terkait).
+- **Layar Riwayat & Pencarian**: Tab khusus Riwayat dengan pencarian catatan/kategori/nominal, filter chip kategori, pengelompokan tanggal beserta subtotal harian, dan swipe-to-delete dengan aksi undo.
+- **Analitik Diperluas**: Pemilih periode `7 Hari`, `Bulan Ini`, dan `Bulan Lalu`, persentase perbandingan terhadap periode sebelumnya, kartu progres **Anggaran Bulanan**, dan grafik batang interaktif.
+- **Pengeluaran Rutin**: Penjadwalan pengeluaran bulanan otomatis (tanggal 1–31) dengan opsi terapkan langsung saat jatuh tempo.
+- **Tema Terang, Gelap, & Sistem**: Dukungan penuh Light Mode, Dark Mode, dan ikuti tema sistem di seluruh layar Compose maupun widget Jetpack Glance.
+- **Anggaran Bulanan**: Target batas pengeluaran bulanan di Pengaturan dan pantauan progres di layar Analitik.
+- **GitHub In-App Updater**: Pemeriksaan pembaruan otomatis (interval 12 jam) dan manual via GitHub Releases lengkap dengan catatan rilis, unduhan berprogres, opsi lewati versi, dan instalasi APK langsung.
+- **App Shortcuts Baru**: Tambahan pintasan peluncur untuk **Split Bill** dan **Riwayat** selain **Catat Cepat** dan **Analitik**.
+
+### Changed
+- **Navigasi Utama**: Peningkatan tata letak menjadi 4 tab Material 3 (`Catat`, `Split Bill`, `Riwayat`, `Analitik`).
+- **Database & Cadangan**: Upgrade skema Room ke versi 3 (`MIGRATION_2_3`) dan pembaruan format cadangan JSON v2 (tetap kompatibel memulihkan berkas cadangan v1) serta kolom `Sumber` pada ekspor CSV.
+- **Keamanan & Rilis**: Konfigurasi `versionCode = 13`, `versionName = "3.0.0"`, `BuildConfig` aktif, izin `INTERNET` dan `REQUEST_INSTALL_PACKAGES`, `FileProvider` untuk folder `updates/`, serta aturan ProGuard/R8 untuk modul Split Bill dan updater.
+
 ## [2.0.0] - 2026-09-29
 ### Added
 - **Production Milestone**: Fast Track is now a production-grade application optimized for performance.

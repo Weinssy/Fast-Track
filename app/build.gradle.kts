@@ -13,8 +13,8 @@ android {
         applicationId = "com.wein.fasttrack"
         minSdk = 26
         targetSdk = 35
-        versionCode = 12
-        versionName = "2.0.0"
+        versionCode = 13
+        versionName = "3.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -42,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {

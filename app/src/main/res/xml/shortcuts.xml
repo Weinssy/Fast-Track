@@ -15,6 +15,32 @@
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
     <shortcut
+        android:shortcutId="shortcut_split_bill"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_share"
+        android:shortcutShortLabel="@string/shortcut_split_bill_short"
+        android:shortcutLongLabel="@string/shortcut_split_bill_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.wein.fasttrack"
+            android:targetClass="com.wein.fasttrack.MainActivity">
+            <extra android:name="shortcut" android:value="split_bill" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="shortcut_history"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:shortcutShortLabel="@string/shortcut_history_short"
+        android:shortcutLongLabel="@string/shortcut_history_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.wein.fasttrack"
+            android:targetClass="com.wein.fasttrack.MainActivity">
+            <extra android:name="shortcut" android:value="history" />
+        </intent>
+    </shortcut>
+    <shortcut
         android:shortcutId="shortcut_analytics"
         android:enabled="true"
         android:icon="@android:drawable/ic_menu_sort_by_size"

@@ -4,6 +4,8 @@
     <string name="today_total">Hari Ini</string>
     <string name="empty_state">Belum ada catatan hari ini</string>
     <string name="save">Simpan</string>
+    <string name="cancel">Batal</string>
+    <string name="delete">Hapus</string>
     <string name="export_csv">Ekspor CSV</string>
     <string name="analytics">Analitik</string>
     <string name="total_this_week">Total Minggu Ini</string>
@@ -11,8 +13,81 @@
     <string name="daily_trend">Tren Harian</string>
     <string name="category_breakdown">Pembagian Kategori</string>
     <string name="tag_umum">Umum</string>
+
+    <!-- App Shortcuts -->
     <string name="shortcut_entry_short">Catat Cepat</string>
     <string name="shortcut_entry_long">Catat Pengeluaran Baru</string>
+    <string name="shortcut_split_bill_short">Split Bill</string>
+    <string name="shortcut_split_bill_long">Bagi Tagihan Bareng</string>
+    <string name="shortcut_history_short">Riwayat</string>
+    <string name="shortcut_history_long">Lihat Riwayat Pengeluaran</string>
     <string name="shortcut_analytics_short">Analitik</string>
     <string name="shortcut_analytics_long">Lihat Analitik Pengeluaran</string>
+
+    <!-- Navigation & Main Screens -->
+    <string name="nav_entry">Catat</string>
+    <string name="nav_split_bill">Split Bill</string>
+    <string name="nav_history">Riwayat</string>
+    <string name="nav_analytics">Analitik</string>
+    <string name="split_bill">Split Bill</string>
+    <string name="history">Riwayat</string>
+
+    <!-- Notes & Expense Editing -->
+    <string name="note_label">Catatan</string>
+    <string name="note_placeholder">Tambah catatan (opsional)</string>
+    <string name="edit_expense">Edit Pengeluaran</string>
+    <string name="search_expenses">Cari catatan atau kategori…</string>
+    <string name="filter_all">Semua</string>
+    <string name="history_empty">Belum ada transaksi ditemukan</string>
+
+    <!-- Theme & Appearance -->
+    <string name="theme_label">Tema</string>
+    <string name="theme_system">Ikuti Sistem</string>
+    <string name="theme_dark">Gelap</string>
+    <string name="theme_light">Terang</string>
+
+    <!-- Budgets & Analytics -->
+    <string name="daily_budget">Anggaran Harian</string>
+    <string name="daily_budget_hint">Kosongkan atau isi 0 untuk menonaktifkan</string>
+    <string name="monthly_budget">Anggaran Bulanan</string>
+    <string name="monthly_budget_hint">Target batas pengeluaran per bulan</string>
+    <string name="monthly_total">Total Bulan Ini</string>
+
+    <!-- Recurring Expenses -->
+    <string name="recurring_expenses">Pengeluaran Rutin</string>
+    <string name="add_recurring_expense">Tambah Pengeluaran Rutin</string>
+    <string name="recurring_day_label">Setiap tanggal %d</string>
+    <string name="recurring_empty">Belum ada pengeluaran rutin</string>
+
+    <!-- Split Bill -->
+    <string name="split_bill_new">Sesi Baru</string>
+    <string name="split_bill_empty">Belum ada sesi Split Bill</string>
+    <string name="split_bill_import">Impor Link / JSON</string>
+    <string name="split_bill_share_wa">Ringkasan WhatsApp</string>
+    <string name="split_bill_share_link">Salin Link</string>
+    <string name="split_bill_sync_expenses">Catat porsi saya ke pengeluaran</string>
+
+    <!-- In-App Updater -->
+    <string name="app_update">Pembaruan Aplikasi</string>
+    <string name="app_version_format">Versi saat ini: %s</string>
+    <string name="check_update">Periksa Pembaruan</string>
+    <string name="checking_update">Memeriksa pembaruan…</string>
+    <string name="update_available">Pembaruan Tersedia</string>
+    <string name="update_up_to_date">Aplikasi sudah versi terbaru</string>
+    <string name="update_check_failed">Gagal memeriksa pembaruan</string>
+    <string name="download_and_install">Unduh &amp; Pasang</string>
+    <string name="downloading_update">Mengunduh pembaruan…</string>
+    <string name="downloading_progress">Mengunduh %d%%</string>
+    <string name="install_permission_needed">Izinkan pemasangan aplikasi dari sumber ini di Setelan.</string>
+    <string name="open_settings">Buka Setelan</string>
+    <string name="view_on_github">Lihat di GitHub</string>
+    <string name="later">Nanti</string>
+    <string name="release_notes">Catatan Rilis</string>
+
+    <!-- Widget -->
+    <string name="widget_add_expense">+ Catat</string>
+    <string name="widget_budget_exceeded">Melebihi batas harian</string>
+    <string name="widget_budget_warning">Mendekati batas harian</string>
+    <string name="widget_budget_remaining">Sisa %s</string>
+    <string name="widget_no_budget">Ketuk untuk catat cepat</string>
 </resources>

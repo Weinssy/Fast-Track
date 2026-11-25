@@ -9,5 +9,6 @@ data class Expense(
     val amount: Long,
     val timestamp: Long = System.currentTimeMillis(),
     val tag: String? = "General",
-    val note: String? = null
+    val note: String? = null,
+    val splitBillSessionId: Long? = null
 )

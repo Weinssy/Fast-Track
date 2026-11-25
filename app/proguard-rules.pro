@@ -1,4 +1,5 @@
--keep class com.wein.fasttrack.data.Expense { *; }
--keep class com.wein.fasttrack.data.TagEntity { *; }
--keep class com.wein.fasttrack.data.BackupPayload { *; }
+-keep class com.wein.fasttrack.data.** { *; }
+-keep class com.wein.fasttrack.splitbill.** { *; }
+-keep class com.wein.fasttrack.utils.GitHubReleaseInfo { *; }
+-keep class com.wein.fasttrack.utils.UpdateCheckResult** { *; }
 -keep class com.wein.fasttrack.widget.** { *; }
